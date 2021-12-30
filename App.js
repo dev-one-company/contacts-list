@@ -16,36 +16,36 @@ import { styles } from './styles';
 function App() {
   const [listOfContacts, setListOfContacts] = useState({});
 
-  useEffect(() => {
-    async function getContacts() {
-      const result = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
-      );
+  async function getContacts() {
+    const result = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+    );
 
-      if (result === 'granted') {
-        const contactsList = await contacts.getAll();
+    if (result === 'granted') {
+      const contactsList = await contacts.getAll();
 
-        let letters = {};
+      let letters = {};
 
-        for (let contact of contactsList) {
-          const firstLetter = contact.givenName[0].toLocaleLowerCase();
+      for (let contact of contactsList) {
+        const firstLetter = contact.givenName[0].toLocaleLowerCase();
 
-          if (letters?.[firstLetter]) {
-            letters[firstLetter].contacts.push(contact);
-          } else {
-            letters[firstLetter] = {
-              contacts: [contact],
-              animation: new Animated.Value(0),
-            };
-          }
+        if (letters?.[firstLetter]) {
+          letters[firstLetter].contacts.push(contact);
+        } else {
+          letters[firstLetter] = {
+            contacts: [contact],
+            animation: new Animated.Value(0),
+          };
         }
-
-        setListOfContacts(letters);
       }
-    }
 
+      setListOfContacts(letters);
+    }
+  }
+
+  useEffect(() => {
     getContacts();
-  }, [listOfContacts.length]);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -99,8 +99,8 @@ function App() {
               <Text style={styles.title}>{item}</Text>
               <View style={styles.contacts}>
                 {listOfContacts[item].contacts.map(contact => {
-                  function onPress() {
-                    contacts.editExistingContact(contact);
+                  async function onPress() {
+                    await contacts.openExistingContact(contact);
                   }
 
                   const phone = contact.phoneNumbers?.[0]?.number;
